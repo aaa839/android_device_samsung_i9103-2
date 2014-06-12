@@ -9,8 +9,7 @@ LOCAL_PATH := device/samsung/i9103
 PRODUCT_PACKAGES += \
     libnetcmdiface \
     com.android.future.usb.accessory \
-    SamsungServiceMode \
-    OmniTorch
+    SamsungServiceMode
 
 # Will be removed soon
 PRODUCT_PACKAGES += DeviceSettings
