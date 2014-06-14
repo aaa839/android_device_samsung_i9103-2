@@ -45,6 +45,7 @@ PRODUCT_BUILD_PROP_OVERRIDES += \
     BUILD_FINGERPRINT="samsung/GT-I9103/GT-I9103:4.0.4/IMM76D/XWLP8:user/release-keys"
 
 # Overriding Default.prop properties
-PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \ ro.debuggable=1
+PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \ 
+	ro.debuggable=1 \
 	persist.sys.usb.config=mtp \
 	persist.service.adb.enable=1
