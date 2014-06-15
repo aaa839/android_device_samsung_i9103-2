@@ -14,13 +14,13 @@
 # limitations under the License.
 #
 
-# Inherit Omni GSM telephony parts
+# Inherit Slim GSM telephony parts
 $(call inherit-product, vendor/slim/config/gsm.mk)
 
 # Low-FPS Bootanimation
 USE_LOWFPS_BOOTANI := true
 
-# Inherit some common Omni stuff.
+# Inherit some common Slim stuff.
 $(call inherit-product, vendor/slim/config/common.mk)
 
 # Inherit device configuration
@@ -45,7 +45,9 @@ PRODUCT_BUILD_PROP_OVERRIDES += \
     BUILD_FINGERPRINT="samsung/GT-I9103/GT-I9103:4.0.4/IMM76D/XWLP8:user/release-keys"
 
 # Overriding Default.prop properties
-PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \ 
+PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
 	ro.debuggable=1 \
 	persist.sys.usb.config=mtp \
-	persist.service.adb.enable=1
+	persist.service.adb.enable=1 \
+	ro.adb.secure=0 \
+	ro.kernel.qemu=1
