@@ -11,6 +11,9 @@ PRODUCT_PACKAGES += \
     com.android.future.usb.accessory \
     SamsungServiceMode
 
+PRODUCT_COPY_FILES := \
+    device/samsung/i9103/asound.conf:system/etc/asound.conf
+    
 # Will be removed soon
 PRODUCT_PACKAGES += DeviceSettings
 
