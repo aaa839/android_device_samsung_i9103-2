@@ -53,14 +53,14 @@ else
 fi
 
 
-#echo -n "Apply patch 0001-external-skia-patch.patch"
-#(cd external/skia; git am ../../device/samsung/i9103/patches/0001-external-skia-patch.patch) > /dev/null 2>&1
-#if [ $? == 0 ]; then
-#	echo "     [DONE]"
-#else
-#	(cd frameworks/av; git am --abort)
-#	echo "     [FAIL]"
-#fi
+echo -n "Apply patch 0001-external-skia-patch.patch"
+(cd external/skia; git am ../../device/samsung/i9103/patches/0001-external-skia-patch.patch) > /dev/null 2>&1
+if [ $? == 0 ]; then
+	echo "     [DONE]"
+else
+	(cd frameworks/av; git am --abort)
+	echo "     [FAIL]"
+fi
 
 echo "Apply patch to frameworks/native"
 echo -n "Apply patch 0001-Fix-layer-dump-for-tegra2.patch"
