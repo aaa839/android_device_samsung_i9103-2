@@ -1,20 +1,18 @@
-From b5f665af94dbb0f0e62bfd4bc675e47a59aac410 Mon Sep 17 00:00:00 2001
-From: kasperhettinga <kasper.hettinga@gmail.com>
-Date: Mon, 30 Dec 2013 07:58:19 +0100
-Subject: [PATCH] Add tegra2 to bionic
+From e1f3d91933a4384113c83f6586b856eed3249b53 Mon Sep 17 00:00:00 2001
+From: Nikhil <nikhil@menghani.com>
+Date: Thu, 19 Jun 2014 15:22:20 +0530
+Subject: [PATCH] tegra2 to bionic patch
 
-Thanks to AAccount!
-
-Change-Id: I6290f50aafebacc23365c3aaa8d01d6c1b54e01e
 ---
- libc/Android.mk                      |   8 +-
- 1 files changed, 8 insertions(+), 1 deletion(-)
- 
+ libc/Android.mk                |  7 +++++++
+ libc/arch-arm/tegra2/tegra2.mk | 12 ++++++------
+ 2 files changed, 13 insertions(+), 6 deletions(-)
+
 diff --git a/libc/Android.mk b/libc/Android.mk
-index 9fc94df..8286240 100644
+index ca6ca78..c93316b 100644
 --- a/libc/Android.mk
 +++ b/libc/Android.mk
-@@ -181,6 +181,13 @@ libc_common_src_files := \
+@@ -182,6 +182,13 @@ libc_common_src_files := \
  	netbsd/nameser/ns_print.c \
  	netbsd/nameser/ns_samedomain.c \
  
@@ -28,11 +26,30 @@ index 9fc94df..8286240 100644
  # Fortify implementations of libc functions.
  libc_common_src_files += \
      bionic/__fgets_chk.cpp \
-@@ -369,7 +376,6 @@ libc_common_src_files += \
- 	string/strncpy.c \
- 	bionic/strchr.cpp \
- 	string/strrchr.c \
--	bionic/memchr.c \
- 	bionic/memrchr.c \
- 	string/index.c \
- 	bionic/strnlen.c \
+diff --git a/libc/arch-arm/tegra2/tegra2.mk b/libc/arch-arm/tegra2/tegra2.mk
+index aded722..5c34887 100644
+--- a/libc/arch-arm/tegra2/tegra2.mk
++++ b/libc/arch-arm/tegra2/tegra2.mk
+@@ -1,13 +1,13 @@
+-$(call libc-add-cpu-variant-src,MEMCPY,arch-arm/tegra2/bionic/memcpy.S)
+-$(call libc-add-cpu-variant-src,MEMSET,arch-arm/tegra2/bionic/memset.S)
+-$(call libc-add-cpu-variant-src,STRCMP,arch-arm/tegra2/bionic/strcmp.S)
+-$(call libc-add-cpu-variant-src,STRCPY,arch-arm/tegra2/bionic/strcpy.S)
++$(call libc-add-cpu-variant-src,MEMCPY,arch-arm/generic/bionic/memcpy.S)
++$(call libc-add-cpu-variant-src,MEMSET,arch-arm/generic/bionic/memset.S)
++$(call libc-add-cpu-variant-src,STRCMP,arch-arm/cortex-a15/bionic/strcmp.S)
++$(call libc-add-cpu-variant-src,STRCPY,arch-arm/generic/bionic/strcpy.S)
++$(call libc-add-cpu-variant-src,__STRCPY_CHK,bionic/__strcpy_chk.cpp)
+ $(call libc-add-cpu-variant-src,MEMMOVE,bionic/memmove.c.arm)
+ $(call libc-add-cpu-variant-src,BCOPY,string/bcopy.c.arm)
+-
+ $(call libc-add-cpu-variant-src,STRCAT,string/strcat.c)
++$(call libc-add-cpu-variant-src,__STRCAT_CHK,bionic/__strcat_chk.cpp)
+ 
+ # armv7-a (non neon) ones from cm10.1
+ $(call libc-add-cpu-variant-src,STRLEN,arch-arm/tegra2/bionic/strlen.S)
+ $(call libc-add-cpu-variant-src,MEMCHR,arch-arm/tegra2/bionic/memchr.S)
+-
+-- 
+1.9.1
+
