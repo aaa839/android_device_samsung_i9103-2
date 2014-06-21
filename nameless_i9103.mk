@@ -15,12 +15,12 @@
 #
 
 # Inherit Slim GSM telephony parts
-$(call inherit-product, vendor/nameless/config/gsm.mk)
+#$(call inherit-product, vendor/nameless/config/gsm.mk)
 
 # Low-FPS Bootanimation
 USE_LOWFPS_BOOTANI := true
 
-# Inherit some common Slim stuff.
+# Inherit some common nameless stuff.
 $(call inherit-product, vendor/nameless/config/common.mk)
 
 # Inherit device configuration
