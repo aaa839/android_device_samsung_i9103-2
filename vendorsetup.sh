@@ -23,7 +23,8 @@
 #add_lunch_combo cm_i9103-eng
 add_lunch_combo full_i9103-eng
 #add_lunch_combo cm_i9103-userdebug
-add_lunch_combo slim_i9103-userdebug
+#add_lunch_combo slim_i9103-userdebug
+add_lunch_combo nameless_i9103-userdebug
 
 echo "Apply patch to frameworks/base"
 echo -n "Apply patch 0001-framework-base-patch.patch"
@@ -72,12 +73,12 @@ else
        echo "     [FAIL]"
 fi
 
-echo "Apply patch to bionic"
-echo -n "Apply patch 0003-Add-tegra2-to-bionic.patch"
-(cd bionic; git am ../device/samsung/i9103/patches/0003-Add-tegra2-to-bionic.patch) > /dev/null 2>&1
-if [ $? == 0 ]; then
-    echo "     [DONE]"
-else
-    (cd bionic; git am --abort)
-    echo "     [FAIL]"
-fi
+#echo "Apply patch to bionic"
+#echo -n "Apply patch 0003-Add-tegra2-to-bionic.patch"
+#(cd bionic; git am ../device/samsung/i9103/patches/0003-Add-tegra2-to-bionic.patch) > /dev/null 2>&1
+#if [ $? == 0 ]; then
+#    echo "     [DONE]"
+#else
+#    (cd bionic; git am --abort)
+#    echo "     [FAIL]"
+#fi
