@@ -23,6 +23,9 @@ USE_LOWFPS_BOOTANI := true
 # Inherit some common nameless stuff.
 $(call inherit-product, vendor/nameless/config/common.mk)
 
+# Specify phone tech before including full_phone
+$(call inherit-product, vendor/nameless/config/apns.mk)
+
 # Inherit device configuration
 $(call inherit-product, device/samsung/i9103/full_i9103.mk)
 
