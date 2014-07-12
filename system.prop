@@ -1,0 +1,7 @@
+#
+# system.prop for i9103
+#
+rild.libpath=/system/lib/libsec-ril.so
+rild.libargs=-d /dev/ttyS0
+
+persist.sys.strictmode.disable=1
