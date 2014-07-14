@@ -30,6 +30,7 @@ SurfaceTexture::SurfaceTexture(int texture_id) {
   JNIEnv* env = base::android::AttachCurrentThread();
   j_surface_texture_.Reset(
       Java_SurfaceTexturePlatformWrapper_create(env, texture_id));
+      j_texture_id_ = texture_id;
 }
 
 SurfaceTexture::~SurfaceTexture() {
@@ -83,12 +84,10 @@ void SurfaceTexture::SetDefaultBufferSize(int width, int height) {
 
 void SurfaceTexture::AttachToGLContext() {
   if (GlContextMethodsAvailable()) {
-    int texture_id;
-    glGetIntegerv(GL_TEXTURE_BINDING_EXTERNAL_OES, &texture_id);
-    DCHECK(texture_id);
+    DCHECK(j_texture_id_);
     JNIEnv* env = base::android::AttachCurrentThread();
     Java_SurfaceTexturePlatformWrapper_attachToGLContext(
-        env, j_surface_texture_.obj(), texture_id);
+        env, j_surface_texture_.obj(), j_texture_id_);
   }
 }
 
