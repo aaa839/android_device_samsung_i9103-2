@@ -137,8 +137,8 @@ ScopedAppGLStateRestore::ScopedAppGLStateRestore(CallMode mode) : mode_(mode) {
     TextureBindings& bindings = texture_bindings_[ii];
     glGetIntegerv(GL_TEXTURE_BINDING_2D, &bindings.texture_2d);
     glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &bindings.texture_cube_map);
-    /*glGetIntegerv(GL_TEXTURE_BINDING_EXTERNAL_OES,
-                  &bindings.texture_external_oes);*/
+    glGetIntegerv(GL_TEXTURE_BINDING_EXTERNAL_OES,
+                  &bindings.texture_external_oes);
   }
 }
 
@@ -155,7 +155,7 @@ ScopedAppGLStateRestore::~ScopedAppGLStateRestore() {
     TextureBindings& bindings = texture_bindings_[ii];
     glBindTexture(GL_TEXTURE_2D, bindings.texture_2d);
     glBindTexture(GL_TEXTURE_CUBE_MAP, bindings.texture_cube_map);
-    //glBindTexture(GL_TEXTURE_EXTERNAL_OES, bindings.texture_external_oes);
+    glBindTexture(GL_TEXTURE_EXTERNAL_OES, bindings.texture_external_oes);
   }
   glActiveTexture(active_texture_);
 
