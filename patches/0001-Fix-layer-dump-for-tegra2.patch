@@ -9,8 +9,8 @@ Subject: [PATCH] Fix layer dump for tegra2
 
 diff --git a/HWComposer.cpp b/HWComposer.cpp
 index 3648d8c..cf8302a 100644
---- a/HWComposer.cpp
-+++ b/HWComposer.cpp
+--- a/services/surfaceflinger/DisplayHardware/HWComposer.cpp
++++ b/services/surfaceflinger/DisplayHardware/HWComposer.cpp
 @@ -1403,6 +1403,60 @@ void HWComposer::dump(String8& result) const {
                      i, disp.width, disp.height, disp.xdpi, disp.ydpi, disp.refresh);
  
