@@ -24,6 +24,10 @@ TARGET_ARCH_VARIANT := armv7-a
 TARGET_ARCH_VARIANT_CPU := cortex-a9
 TARGET_CPU_VARIANT := tegra2
 
+#hardware floating point support.
+#architecture to support all possible platforms which can doenload games on Google Play.
+APP_ABI := armeabi-v7a 
+
 # Avoid the generation of ldrcc instructions
 NEED_WORKAROUND_CORTEX_A9_745320 := true
 # COMMON_GLOBAL_CFLAGS += -DWORKAROUND_CORTEX_A9_745320
