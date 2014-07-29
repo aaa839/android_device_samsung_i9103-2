@@ -214,6 +214,11 @@ int AudioSystem::logToLinear(float volume)
     return volume ? 100 - int(dBConvertInverse * log(volume) + 0.5) : 0;
 }
 
+extern "C" status_t _ZN7android11AudioSystem21getOutputSamplingRateEPii(uint32_t* samplingRate, audio_stream_type_t streamType)
+{
+    return AudioSystem::getOutputFrameCount(samplingRate, streamType);
+}
+
 status_t AudioSystem::getOutputSamplingRate(uint32_t* samplingRate, audio_stream_type_t streamType)
 {
     audio_io_handle_t output;
@@ -254,6 +259,11 @@ status_t AudioSystem::getSamplingRate(audio_io_handle_t output,
             *samplingRate);
 
     return NO_ERROR;
+}
+
+extern "C" status_t _ZN7android11AudioSystem19getOutputFrameCountEPii(size_t* frameCount, audio_stream_type_t streamType)
+{
+    return AudioSystem::getOutputFrameCount(frameCount, streamType);
 }
 
 status_t AudioSystem::getOutputFrameCount(size_t* frameCount, audio_stream_type_t streamType)
