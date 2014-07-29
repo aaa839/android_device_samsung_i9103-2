@@ -1,45 +1,37 @@
-From 1b8af0167026113ad1184c5081f9eaa3181d29b6 Mon Sep 17 00:00:00 2001
+From 18f79f399172bc06fa921df074da288ff13e0d22 Mon Sep 17 00:00:00 2001
 From: Nikhil <nikhil@menghani.com>
-Date: Tue, 29 Jul 2014 20:27:19 +0530
+Date: Tue, 29 Jul 2014 20:34:20 +0530
 Subject: [PATCH] Add tegra2 to bionic
 
 ---
- libc/Android.mk                      |  90 +++++++++++----------
+ libc/Android.mk                      |   8 +-
  libc/arch-arm/terga2/bionic/memchr.S | 151 +++++++++++++++++++++++++++++++++++
  libc/arch-arm/terga2/bionic/strlen.S | 111 +++++++++++++++++++++++++
  libc/arch-arm/terga2/tegra2.mk       |  13 +++
- 4 files changed, 323 insertions(+), 42 deletions(-)
+ 4 files changed, 282 insertions(+), 1 deletion(-)
  create mode 100644 libc/arch-arm/terga2/bionic/memchr.S
  create mode 100644 libc/arch-arm/terga2/bionic/strlen.S
  create mode 100644 libc/arch-arm/terga2/tegra2.mk
 
 diff --git a/libc/Android.mk b/libc/Android.mk
-index 5957ea7..7bb5906 100755
+index 4041bc1..1a18220 100755
 --- a/libc/Android.mk
 +++ b/libc/Android.mk
-@@ -182,8 +182,15 @@ libc_common_src_files := \
+@@ -182,6 +182,13 @@ libc_common_src_files := \
  	netbsd/nameser/ns_print.c \
  	netbsd/nameser/ns_samedomain.c \
  
 +# cortex-a9 without neon
 +ifneq ($(TARGET_CPU_VARIANT),tegra2)
-+    libc_common_src_files = \
++    libc_common_src_files += \
 +        bionic/memchr.c \
 +
 +endif
 +
  # Fortify implementations of libc functions.
--libc_common_src_files += \
-+libc_common_src_files = \
+ libc_common_src_files = \
      bionic/__fgets_chk.cpp \
-     bionic/__memcpy_chk.cpp \
-     bionic/__memmove_chk.cpp \
-@@ -366,11 +373,10 @@ libc_upstream_netbsd_src_files := \
- # Architecture specific source files go here
- # =========================================================
- ifeq ($(TARGET_ARCH),arm)
--libc_common_src_files += \
-+libc_common_src_files = \
+@@ -370,7 +377,6 @@ libc_common_src_files = \
  	string/strncpy.c \
  	bionic/strchr.cpp \
  	string/strrchr.c \
@@ -47,278 +39,6 @@ index 5957ea7..7bb5906 100755
  	bionic/memrchr.c \
  	string/index.c \
  	string/strlcpy.c \
-@@ -385,13 +391,13 @@ libc_common_src_files += \
- # These files need to be arm so that gdbserver
- # can set breakpoints in them without messing
- # up any thumb code.
--libc_common_src_files += \
-+libc_common_src_files = \
- 	bionic/pthread-atfork.c.arm \
- 	bionic/pthread-rwlocks.c.arm \
- 	bionic/pthread-timers.c.arm \
- 	bionic/ptrace.c.arm
- 
--libc_static_common_src_files += \
-+libc_static_common_src_files = \
-     bionic/pthread.c.arm \
-     bionic/pthread_create.cpp.arm \
-     bionic/pthread_key.cpp.arm \
-@@ -399,23 +405,23 @@ libc_static_common_src_files += \
- endif # arm
- 
- ifeq ($(TARGET_ARCH),x86)
--libc_common_src_files += \
-+libc_common_src_files = \
-     bionic/pthread-atfork.c \
-     bionic/pthread-rwlocks.c \
-     bionic/pthread-timers.c \
-     bionic/ptrace.c \
- 
--libc_static_common_src_files += \
-+libc_static_common_src_files = \
-     bionic/pthread.c \
-     bionic/pthread_create.cpp \
-     bionic/pthread_key.cpp \
- 
--libc_common_src_files += \
-+libc_common_src_files = \
-     bionic/memchr.c
- endif # x86
- 
- ifeq ($(TARGET_ARCH),mips)
--libc_common_src_files += \
-+libc_common_src_files = \
- 	bionic/memcmp.c \
- 	string/bcopy.c \
- 	string/strcmp.c \
-@@ -440,13 +446,13 @@ libc_common_src_files += \
- 	upstream-freebsd/lib/libc/string/wcslen.c \
- 	upstream-freebsd/lib/libc/string/wcscat.c
- 
--libc_common_src_files += \
-+libc_common_src_files = \
- 	bionic/pthread-atfork.c \
- 	bionic/pthread-rwlocks.c \
- 	bionic/pthread-timers.c \
- 	bionic/ptrace.c
- 
--libc_static_common_src_files += \
-+libc_static_common_src_files = \
-     bionic/pthread.c \
-     bionic/pthread_create.cpp \
-     bionic/pthread_key.cpp \
-@@ -472,7 +478,7 @@ $(if $(filter true,$(_LIBC_ARCH_CPU_VARIANT_HAS_$(1))), \
- 	, \
-      $(eval _LIBC_ARCH_CPU_VARIANT_HAS_$(1) := true) \
-      $(eval _LIBC_ARCH_CPU_VARIANT_SRC_FILE.$(1) := $(2)) \
--     $(eval _LIBC_ARCH_CPU_VARIANT_SRC_FILES += $(2)) \
-+     $(eval _LIBC_ARCH_CPU_VARIANT_SRC_FILES = $(2)) \
- )
- endef
- 
-@@ -482,8 +488,8 @@ _LIBC_ARCH_STATIC_SRC_FILES :=
- _LIBC_ARCH_DYNAMIC_SRC_FILES :=
- include bionic/libc/arch-$(TARGET_ARCH)/$(TARGET_ARCH).mk
- 
--libc_common_src_files += $(_LIBC_ARCH_COMMON_SRC_FILES)
--libc_common_src_files += $(_LIBC_ARCH_CPU_VARIANT_SRC_FILES)
-+libc_common_src_files = $(_LIBC_ARCH_COMMON_SRC_FILES)
-+libc_common_src_files = $(_LIBC_ARCH_CPU_VARIANT_SRC_FILES)
- libc_arch_static_src_files := $(_LIBC_ARCH_STATIC_SRC_FILES)
- libc_arch_dynamic_src_files := $(_LIBC_ARCH_DYNAMIC_SRC_FILES)
- 
-@@ -501,54 +507,54 @@ libc_common_cflags := \
-     -Wall -Wextra
- 
- ifeq ($(strip $(DEBUG_BIONIC_LIBC)),true)
--  libc_common_cflags += -DDEBUG
-+  libc_common_cflags = -DDEBUG
- endif
- 
- # To customize dlmalloc's alignment, set BOARD_MALLOC_ALIGNMENT in
- # the appropriate BoardConfig.mk file.
- #
- ifneq ($(BOARD_MALLOC_ALIGNMENT),)
--  libc_common_cflags += -DMALLOC_ALIGNMENT=$(BOARD_MALLOC_ALIGNMENT)
-+  libc_common_cflags = -DMALLOC_ALIGNMENT=$(BOARD_MALLOC_ALIGNMENT)
- endif
- 
- ifeq ($(TARGET_ARCH),arm)
--  libc_common_cflags += -DSOFTFLOAT
--  libc_common_cflags += -fstrict-aliasing
-+  libc_common_cflags = -DSOFTFLOAT
-+  libc_common_cflags = -fstrict-aliasing
-   libc_crt_target_cflags := -mthumb-interwork
- endif # !arm
- 
- ifeq ($(TARGET_ARCH),x86)
--  libc_common_cflags += -DSOFTFLOAT
-+  libc_common_cflags = -DSOFTFLOAT
-   libc_crt_target_cflags :=
-   ifeq ($(ARCH_X86_HAVE_SSE2),true)
--      libc_crt_target_cflags += -DUSE_SSE2=1
-+      libc_crt_target_cflags = -DUSE_SSE2=1
-   endif
-   ifeq ($(ARCH_X86_HAVE_SSSE3),true)
--      libc_crt_target_cflags += -DUSE_SSSE3=1
-+      libc_crt_target_cflags = -DUSE_SSSE3=1
-   endif
- endif # x86
- 
- ifeq ($(ARCH_ARM_HAVE_ARMV7A),true)
--  libc_common_cflags += -DNEON_UNALIGNED_ACCESS -DNEON_MEMCPY_ALIGNMENT_DIVIDER=224
-+  libc_common_cflags = -DNEON_UNALIGNED_ACCESS -DNEON_MEMCPY_ALIGNMENT_DIVIDER=224
- endif
- 
- ifeq ($(TARGET_ARCH),mips)
-   ifneq ($(ARCH_MIPS_HAS_FPU),true)
--    libc_common_cflags += -DSOFTFLOAT
-+    libc_common_cflags = -DSOFTFLOAT
-   endif
--  libc_common_cflags += -fstrict-aliasing
-+  libc_common_cflags = -fstrict-aliasing
-   libc_crt_target_cflags := $(TARGET_GLOBAL_CFLAGS)
- endif # mips
- 
- # Define ANDROID_SMP appropriately.
- ifeq ($(TARGET_CPU_SMP),true)
--    libc_common_cflags += -DANDROID_SMP=1
-+    libc_common_cflags = -DANDROID_SMP=1
- else
--    libc_common_cflags += -DANDROID_SMP=0
-+    libc_common_cflags = -DANDROID_SMP=0
- endif
- 
- # crtbrand.c needs <stdint.h> and a #define for the platform SDK version.
--libc_crt_target_cflags += \
-+libc_crt_target_cflags = \
-     -I$(LOCAL_PATH)/include  \
-     -DPLATFORM_SDK_VERSION=$(PLATFORM_SDK_VERSION)
- 
-@@ -562,7 +568,7 @@ libc_common_c_includes := \
- 
- # Needed to access private/__dso_handle.h from
- # crtbegin_xxx.S and crtend_xxx.S
--libc_crt_target_cflags += \
-+libc_crt_target_cflags = \
-     -I$(LOCAL_PATH)/private \
-     -I$(LOCAL_PATH)/arch-$(TARGET_ARCH)/include
- 
-@@ -578,7 +584,7 @@ libc_crt_target_cflags += \
- #
- # For all the platforms, the .fini_array section must point to a function
- # that will call __cxa_finalize(&__dso_handle) in order to ensure that
--# static C++ destructors are properly called on dlclose().
-+# static C destructors are properly called on dlclose().
- #
- ifeq ($(TARGET_ARCH),arm)
-     libc_crt_target_so_cflags :=
-@@ -589,7 +595,7 @@ endif
- ifeq ($(TARGET_ARCH),x86)
-     libc_crt_target_so_cflags := -fPIC
- endif
--libc_crt_target_so_cflags += $(libc_crt_target_cflags)
-+libc_crt_target_so_cflags = $(libc_crt_target_cflags)
- libc_crt_target_crtbegin_file := $(LOCAL_PATH)/arch-$(TARGET_ARCH)/bionic/crtbegin.c
- libc_crt_target_crtbegin_so_file := $(LOCAL_PATH)/arch-$(TARGET_ARCH)/bionic/crtbegin_so.c
- 
-@@ -603,13 +609,13 @@ $(GEN): $(LOCAL_PATH)/bionic/crtbrand.c
- 	$(hide) sed -i -e '/\.note\.ABI-tag/s/progbits/note/' $@
- 	$(call transform-d-to-p-args,$(@:%.s=%.d),$(@:%.s=%.P))
- -include $(GEN:%.s=%.P)
--ALL_GENERATED_SOURCES += $(GEN)
-+ALL_GENERATED_SOURCES = $(GEN)
- 
- GEN := $(TARGET_OUT_INTERMEDIATE_LIBRARIES)/crtbrand.o
- $(GEN): $(TARGET_OUT_INTERMEDIATE_LIBRARIES)/crtbrand.s
- 	@mkdir -p $(dir $@)
- 	$(hide) $(TARGET_CC) $(libc_crt_target_so_cflags) -o $@ -c $<
--ALL_GENERATED_SOURCES += $(GEN)
-+ALL_GENERATED_SOURCES = $(GEN)
- 
- GEN := $(TARGET_OUT_INTERMEDIATE_LIBRARIES)/crtbegin_so.o
- $(GEN): $(libc_crt_target_crtbegin_so_file)
-@@ -618,7 +624,7 @@ $(GEN): $(libc_crt_target_crtbegin_so_file)
- 		-MD -MF $(@:%.o=%.d) -o $@ -c $<
- 	$(transform-d-to-p)
- -include $(GEN:%.o=%.P)
--ALL_GENERATED_SOURCES += $(GEN)
-+ALL_GENERATED_SOURCES = $(GEN)
- 
- GEN := $(TARGET_OUT_INTERMEDIATE_LIBRARIES)/crtend_so.o
- $(GEN): $(LOCAL_PATH)/arch-$(TARGET_ARCH)/bionic/crtend_so.S
-@@ -627,18 +633,18 @@ $(GEN): $(LOCAL_PATH)/arch-$(TARGET_ARCH)/bionic/crtend_so.S
- 		-MD -MF $(@:%.o=%.d) -o $@ -c $<
- 	$(transform-d-to-p)
- -include $(GEN:%.o=%.P)
--ALL_GENERATED_SOURCES += $(GEN)
-+ALL_GENERATED_SOURCES = $(GEN)
- 
- # The following two are installed to device
- GEN := $(TARGET_OUT_SHARED_LIBRARIES)/crtbegin_so.o
- $(GEN): $(TARGET_OUT_INTERMEDIATE_LIBRARIES)/crtbegin_so.o
- 	$(hide) mkdir -p $(dir $@) && cp -f $< $@
--ALL_GENERATED_SOURCES += $(GEN)
-+ALL_GENERATED_SOURCES = $(GEN)
- 
- GEN := $(TARGET_OUT_SHARED_LIBRARIES)/crtend_so.o
- $(GEN): $(TARGET_OUT_INTERMEDIATE_LIBRARIES)/crtend_so.o
- 	$(hide) mkdir -p $(dir $@) && cp -f $< $@
--ALL_GENERATED_SOURCES += $(GEN)
-+ALL_GENERATED_SOURCES = $(GEN)
- 
- 
- GEN := $(TARGET_OUT_INTERMEDIATE_LIBRARIES)/crtbegin_static1.o
-@@ -648,13 +654,13 @@ $(GEN): $(libc_crt_target_crtbegin_file)
- 		-MD -MF $(@:%.o=%.d) -o $@ -c $<
- 	$(transform-d-to-p)
- -include $(GEN:%.o=%.P)
--ALL_GENERATED_SOURCES += $(GEN)
-+ALL_GENERATED_SOURCES = $(GEN)
- 
- GEN := $(TARGET_OUT_INTERMEDIATE_LIBRARIES)/crtbegin_static.o
- $(GEN): $(TARGET_OUT_INTERMEDIATE_LIBRARIES)/crtbegin_static1.o $(TARGET_OUT_INTERMEDIATE_LIBRARIES)/crtbrand.o
- 	@mkdir -p $(dir $@)
- 	$(hide) $(TARGET_LD) -r -o $@ $^
--ALL_GENERATED_SOURCES += $(GEN)
-+ALL_GENERATED_SOURCES = $(GEN)
- 
- GEN := $(TARGET_OUT_INTERMEDIATE_LIBRARIES)/crtbegin_dynamic1.o
- $(GEN): $(libc_crt_target_crtbegin_file)
-@@ -663,13 +669,13 @@ $(GEN): $(libc_crt_target_crtbegin_file)
- 		-MD -MF $(@:%.o=%.d) -o $@ -c $<
- 	$(transform-d-to-p)
- -include $(GEN:%.o=%.P)
--ALL_GENERATED_SOURCES += $(GEN)
-+ALL_GENERATED_SOURCES = $(GEN)
- 
- GEN := $(TARGET_OUT_INTERMEDIATE_LIBRARIES)/crtbegin_dynamic.o
- $(GEN): $(TARGET_OUT_INTERMEDIATE_LIBRARIES)/crtbegin_dynamic1.o $(TARGET_OUT_INTERMEDIATE_LIBRARIES)/crtbrand.o
- 	@mkdir -p $(dir $@)
- 	$(hide) $(TARGET_LD) -r -o $@ $^
--ALL_GENERATED_SOURCES += $(GEN)
-+ALL_GENERATED_SOURCES = $(GEN)
- 
- # We rename crtend.o to crtend_android.o to avoid a
- # name clash between gcc and bionic.
-@@ -680,7 +686,7 @@ $(GEN): $(LOCAL_PATH)/arch-$(TARGET_ARCH)/bionic/crtend.S
- 		-MD -MF $(@:%.o=%.d) -o $@ -c $<
- 	$(transform-d-to-p)
- -include $(GEN:%.o=%.P)
--ALL_GENERATED_SOURCES += $(GEN)
-+ALL_GENERATED_SOURCES = $(GEN)
- 
- 
- # To enable malloc leak check for statically linked programs, add
-@@ -896,7 +902,7 @@ LOCAL_SRC_FILES := \
- 
- ifeq ($(TARGET_ARCH),arm)
- 	LOCAL_NO_CRT := true
--	LOCAL_CFLAGS += -DCRT_LEGACY_WORKAROUND
-+	LOCAL_CFLAGS = -DCRT_LEGACY_WORKAROUND
- 
- 	LOCAL_SRC_FILES := \
- 		arch-arm/bionic/crtbegin_so.c \
 diff --git a/libc/arch-arm/terga2/bionic/memchr.S b/libc/arch-arm/terga2/bionic/memchr.S
 new file mode 100644
 index 0000000..de8a57c
