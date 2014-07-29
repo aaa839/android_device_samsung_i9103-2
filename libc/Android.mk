@@ -182,6 +182,13 @@ libc_common_src_files := \
 	netbsd/nameser/ns_print.c \
 	netbsd/nameser/ns_samedomain.c \
 
+# cortex-a9 without neon
+ifneq ($(TARGET_CPU_VARIANT),tegra2)
+    libc_common_src_files += \
+        bionic/memchr.c \
+
+endif
+
 # Fortify implementations of libc functions.
 libc_common_src_files = \
     bionic/__fgets_chk.cpp \
@@ -370,7 +377,6 @@ libc_common_src_files = \
 	string/strncpy.c \
 	bionic/strchr.cpp \
 	string/strrchr.c \
-	bionic/memchr.c \
 	bionic/memrchr.c \
 	string/index.c \
 	string/strlcpy.c \
