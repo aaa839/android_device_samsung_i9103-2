@@ -48,7 +48,6 @@ TARGET_TEGRA_VERSION := ap20
 TARGET_BOARD_PLATFORM_GPU := tegra
 TARGET_BOOTLOADER_BOARD_NAME := n1
 TARGET_USERIMAGES_USE_EXT4 := true
-ARCH_ARM_USE_NON_NEON_MEMCPY := true
 HAVE_SELINUX := true
 
 BOARD_NAND_PAGE_SIZE := 4096
@@ -92,8 +91,8 @@ TARGET_NO_RADIOIMAGE := true
 
 # Required to build a recovery image of 5MB max
 ifeq ($(TARGET_NO_RECOVERY),false)
-    BOARD_CUSTOM_BOOTIMG_MK := device/samsung/i9103/recovery/bootimg.mk
-    TARGET_PREBUILT_RECOVERY_KERNEL := device/samsung/i9103/recovery/kernel-selinux
+	BOARD_CUSTOM_BOOTIMG_MK := $(LOCAL_PATH)/recovery/bootimg.mk
+    TARGET_PREBUILT_RECOVERY_KERNEL := $(LOCAL_PATH)/recovery/kernel-selinux
 endif
 
 # New CM 10.2 HW settings
@@ -194,16 +193,16 @@ BOARD_HAS_SDCARD_INTERNAL := true
 #
 BOARD_CHARGING_MODE_BOOTING_LPM := "/sys/class/power_supply/ac/online"
 BOARD_BATTERY_DEVICE_NAME := "battery"
-BOARD_CHARGER_RES := $(LOCAL_PATH)/res/charger
+BOARD_CHARGER_RES := $(LOCAL_PATH)/rootdir/charger
 
 # EMMC brickbug is removed in the kernel, but be better safe than sorry.
 BOARD_SUPPRESS_EMMC_WIPE := true
 
 # Recovery
 TARGET_RECOVERY_INITRC := $(LOCAL_PATH)/recovery/init.recovery.n1.rc
-BOARD_CUSTOM_RECOVERY_KEYMAPPING := ../../device/samsung/i9103/recovery/recovery_keys.c
-BOARD_CUSTOM_GRAPHICS := ../../../device/samsung/i9103/recovery/graphics.c
-TARGET_RECOVERY_FSTAB := device/samsung/i9103/fstab.n1
+BOARD_CUSTOM_RECOVERY_KEYMAPPING := ../../$(LOCAL_PATH)/recovery/recovery_keys.c
+BOARD_CUSTOM_GRAPHICS := ../../../$(LOCAL_PATH)/recovery/graphics.c
+TARGET_RECOVERY_FSTAB := $(LOCAL_PATH)/rootdir/fstab.n1
 RECOVERY_FSTAB_VERSION := 2
 
 BOARD_UMS_LUNFILE := "/sys/devices/platform/fsl-tegra-udc/gadget/lun%d/file"
