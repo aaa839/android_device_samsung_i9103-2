@@ -203,9 +203,11 @@ SkPaint::SkPaint() {
 }
 
 SkPaint::SkPaint(const SkPaint& src) {
+#ifdef NEON_BLIT_ANTI_H
     if (sizeof(src) == SIZE_OF_PAINT)
         memcpy_paint_opt((int*)this, (int*)&src);
     else
+#endif
         memcpy((int*)this, (int*)&src, sizeof(src));
 
     SkSafeRef(fTypeface);
