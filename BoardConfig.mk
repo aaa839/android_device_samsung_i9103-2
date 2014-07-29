@@ -22,7 +22,10 @@ TARGET_CPU_ABI2 := armeabi
 TARGET_CPU_SMP := true
 TARGET_ARCH_VARIANT := armv7-a
 TARGET_ARCH_VARIANT_CPU := cortex-a9
-TARGET_CPU_VARIANT := tegra2
+
+#with bionic patch else use "generic" i.e. set tegra2 if you find tegra2.mk in bionic else generic
+#TARGET_CPU_VARIANT := tegra2
+TARGET_CPU_VARIANT := generic
 
 #hardware floating point support.
 #architecture to support all possible platforms which can doenload games on Google Play.
