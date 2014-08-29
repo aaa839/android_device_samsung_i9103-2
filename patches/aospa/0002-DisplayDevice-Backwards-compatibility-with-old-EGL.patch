@@ -1,0 +1,55 @@
+From 63212695338287818e746d96a801162d5f702d87 Mon Sep 17 00:00:00 2001
+From: Nikhil <nikhil@menghani.com>
+Date: Tue, 29 Jul 2014 19:13:51 +0530
+Subject: [PATCH] DisplayDevice: Backwards compatibility with old EGL
+
+---
+ services/surfaceflinger/Android.mk        | 4 ++++
+ services/surfaceflinger/DisplayDevice.cpp | 8 ++++++++
+ 2 files changed, 12 insertions(+)
+
+diff --git a/services/surfaceflinger/Android.mk b/services/surfaceflinger/Android.mk
+index b7a1cab..3c049e2 100644
+--- a/services/surfaceflinger/Android.mk
++++ b/services/surfaceflinger/Android.mk
+@@ -52,6 +52,10 @@ ifeq ($(TARGET_FORCE_HWC_FOR_VIRTUAL_DISPLAYS),true)
+     LOCAL_CFLAGS += -DFORCE_HWC_COPY_FOR_VIRTUAL_DISPLAYS
+ endif
+ 
++ifeq ($(BOARD_EGL_NEEDS_FNW),true)
++    LOCAL_CFLAGS += -DEGL_NEEDS_FNW
++endif
++
+ ifneq ($(NUM_FRAMEBUFFER_SURFACE_BUFFERS),)
+   LOCAL_CFLAGS += -DNUM_FRAMEBUFFER_SURFACE_BUFFERS=$(NUM_FRAMEBUFFER_SURFACE_BUFFERS)
+ endif
+diff --git a/services/surfaceflinger/DisplayDevice.cpp b/services/surfaceflinger/DisplayDevice.cpp
+index 5f765bd..b954d8b 100755
+--- a/services/surfaceflinger/DisplayDevice.cpp
++++ b/services/surfaceflinger/DisplayDevice.cpp
+@@ -29,6 +29,10 @@
+ 
+ #include <gui/Surface.h>
+ 
++#ifdef EGL_NEEDS_FNW
++#include <ui/FramebufferNativeWindow.h>
++#endif
++
+ #include <hardware/gralloc.h>
+ 
+ #include "DisplayHardware/DisplaySurface.h"
+@@ -75,7 +79,11 @@ DisplayDevice::DisplayDevice(
+       mOrientation()
+ {
+     mNativeWindow = new Surface(producer, false);
++#ifndef EGL_NEEDS_FNW
+     ANativeWindow* const window = mNativeWindow.get();
++#else
++    ANativeWindow* const window = new FramebufferNativeWindow();
++#endif
+ 
+     int format;
+     window->query(window, NATIVE_WINDOW_FORMAT, &format);
+-- 
+1.9.1
+
