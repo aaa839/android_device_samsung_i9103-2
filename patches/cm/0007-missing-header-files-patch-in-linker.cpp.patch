@@ -1,0 +1,27 @@
+From cf1cdf9c419d8e163dba63bad4c05b1b66ab54cc Mon Sep 17 00:00:00 2001
+From: Nikhil <nikhil@menghani.com>
+Date: Fri, 5 Sep 2014 11:53:08 +0530
+Subject: [PATCH] missing header files patch in linker.cpp
+
+---
+ linker.cpp | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/linker.cpp b/linker.cpp
+index 86371b5..45fb998 100644
+--- a/linker.cpp
++++ b/linker.cpp
+@@ -64,6 +64,10 @@
+  * \author Ian Romanick <ian.d.romanick@intel.com>
+  */
+ 
++#include <cstdio>
++#include <cstdarg>
++#include <climits>
++#include <stddef.h>
+ #include "main/core.h"
+ #include "glsl_symbol_table.h"
+ #include "ir.h"
+-- 
+1.9.1
+

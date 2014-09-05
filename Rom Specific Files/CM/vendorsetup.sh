@@ -80,12 +80,12 @@ else
   echo "     [FAIL]"
 fi
 
-#echo "Apply patch to bionic"
-#echo -n "Apply patch 0007-Add-tegra2-to-bionic.patch"
-#(cd bionic; git am ../device/samsung/i9103/patches/cm/0007-Add-tegra2-to-bionic.patch) > /dev/null 2>&1
-#if [ $? == 0 ]; then
-#    echo "     [DONE]"
-#else
-#    (cd bionic; git am --abort)
-#    echo "     [FAIL]"
-#fi
+echo "Apply patch to external/mesa3d/src/glsl/"
+echo -n "Apply patch 0007-missing-header-files-patch-in-linker.cpp.patch"
+(cd Apply patch to external/mesa3d/src/glsl; git am ../../device/samsung/i9103/patches/cm/0007-missing-header-files-patch-in-linker.cpp.patch) > /dev/null 2>&1
+if [ $? == 0 ]; then
+  echo "     [DONE]"
+else
+  (cd Apply patch to external/mesa3d/src/glsl; git am --abort)
+  echo "     [FAIL]"
+fi
