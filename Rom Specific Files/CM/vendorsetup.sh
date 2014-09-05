@@ -99,3 +99,13 @@ else
   (cd Apply patch to packages/apps/Camera2; git am --abort)
   echo "     [FAIL]"
 fi
+
+echo "Apply patch to packages/apps/Camera2"
+echo -n "Apply patch 0009-Allow-setting-profile-video-size-before-recording-starts.patch"
+(cd Apply patch to packages/apps/Camera2; git am ../../device/samsung/i9103/patches/cm/0009-Allow-setting-profile-video-size-before-recording-starts.patch) > /dev/null 2>&1
+if [ $? == 0 ]; then
+  echo "     [DONE]"
+else
+  (cd Apply patch to packages/apps/Camera2; git am --abort)
+  echo "     [FAIL]"
+fi

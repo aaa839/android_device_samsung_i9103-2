@@ -1,0 +1,74 @@
+From 7d17db46aeca09a5c00652249437ec5dcaa3016c Mon Sep 17 00:00:00 2001
+From: Nikhil <nikhil@menghani.com>
+Date: Fri, 5 Sep 2014 13:21:54 +0530
+Subject: [PATCH] Camera: Allow setting profile-video-size before recording
+ starts
+
+---
+ src/com/android/camera/VideoModule.java     | 2 +-
+ src/com/android/camera/util/CameraUtil.java | 8 ++++++++
+ res/values/config.xml    | 2 ++
+ 3 files changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/src/com/android/camera/VideoModule.java b/src/com/android/camera/VideoModule.java
+index 3686328..84a216a 100644
+--- a/src/com/android/camera/VideoModule.java
++++ b/src/com/android/camera/VideoModule.java
+@@ -865,7 +865,7 @@ public class VideoModule implements CameraModule,
+             return;
+         }
+         mParameters = mCameraDevice.getParameters();
+-        if (mParameters.getSupportedVideoSizes() == null) {
++        if (mParameters.getSupportedVideoSizes() == null || CameraUtil.useProfileVideoSize()) {
+             mDesiredPreviewWidth = mProfile.videoFrameWidth;
+             mDesiredPreviewHeight = mProfile.videoFrameHeight;
+         } else { // Driver supports separates outputs for preview and video.
+diff --git a/src/com/android/camera/util/CameraUtil.java b/src/com/android/camera/util/CameraUtil.java
+index 62077d2..8d03c7f 100644
+--- a/src/com/android/camera/util/CameraUtil.java
++++ b/src/com/android/camera/util/CameraUtil.java
+@@ -230,6 +230,9 @@ public class CameraUtil {
+ 
+ 	// For setting video size before recording starts
+     private static boolean sEarlyVideoSize;
++    
++    // For setting video desired profile size
++    private static boolean sProfileVideoSize;
+ 
+     private CameraUtil() {
+     }
+@@ -252,6 +255,7 @@ public class CameraUtil {
+                 com.android.internal.R.integer.config_deviceHardwareKeys);
+         sSamsungCamMode = context.getResources().getBoolean(R.bool.needsSamsungCamMode);
+         sHTCCamMode = context.getResources().getBoolean(R.bool.needsHTCCamMode);
++        sProfileVideoSize = context.getResources().getBoolean(R.bool.useProfileVideoSize);
+         sEarlyVideoSize = context.getResources().getBoolean(R.bool.needsEarlyVideoSize);
+         sASDModes = context.getResources().getStringArray(R.array.asdModes);
+         sEnableHDRWithZSL = context.getResources().getBoolean(R.bool.enableHDRWithZSL);
+@@ -278,6 +282,10 @@ public class CameraUtil {
+         return sSamsungCamMode;
+     }
+ 
++	public static boolean useProfileVideoSize() {
++        return sProfileVideoSize;
++    }
++
+ 	public static boolean needsEarlyVideoSize() {
+         return sEarlyVideoSize;
+     }
+diff --git a/res/values/config.xml b/res/values/config.xml
+index 74ba063..4207851 100644
+--- a/res/values/config.xml
++++ b/res/values/config.xml
+@@ -37,6 +37,8 @@
+     <bool name="needsHTCCamMode">false</bool>
+     <!-- Allows setting video size before recording starts -->
+     <bool name="needsEarlyVideoSize">true</bool>
++    <!-- Force use of profile video size -->
++    <bool name="useProfileVideoSize">true</bool>
+ 
+     <!-- Ordered list of detected scene modes
+          This should reference the list in camera_asd_values and
+-- 
+1.9.1
+
