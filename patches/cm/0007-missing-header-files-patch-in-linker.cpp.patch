@@ -4,13 +4,13 @@ Date: Fri, 5 Sep 2014 11:53:08 +0530
 Subject: [PATCH] missing header files patch in linker.cpp
 
 ---
- linker.cpp | 4 ++++
+ src/glsl/linker.cpp | 4 ++++
  1 file changed, 4 insertions(+)
 
-diff --git a/linker.cpp b/linker.cpp
+diff --git a/src/glsl/linker.cpp b/src/glsl/linker.cpp
 index 86371b5..45fb998 100644
---- a/linker.cpp
-+++ b/linker.cpp
+--- a/src/glsl/linker.cpp
++++ b/src/glsl/linker.cpp
 @@ -64,6 +64,10 @@
   * \author Ian Romanick <ian.d.romanick@intel.com>
   */

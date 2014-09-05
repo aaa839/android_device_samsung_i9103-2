@@ -4,10 +4,10 @@ Date: Fri, 5 Sep 2014 13:01:29 +0530
 Subject: [PATCH] setting video-size before recording patch
 
 ---
- CameraSettings.java  | 13 +++++++++++++
- VideoModule.java     |  3 +++
- util/CameraUtil.java |  8 ++++++++
- values/config.xml    |  2 ++
+ src/com/android/camera/CameraSettings.java  | 13 +++++++++++++
+ src/com/android/camera/VideoModule.java     |  3 +++
+ src/com/android/camera/util/CameraUtil.java |  8 ++++++++
+ res/values/config.xml    |  2 ++
  4 files changed, 26 insertions(+)
 
 diff --git a/src/com/android/camera/CameraSettings.java b/src/com/android/camera/CameraSettings.java
