@@ -166,6 +166,19 @@ public class CameraSettings {
     public static final int META_DATA_FD  = 2;
     public static final int META_DATA_HDR = 3;
 
+/**
+     * Set video size for certain cameras.
+     *
+     * @param params
+     * @param profile
+     */
+    public static void setEarlyVideoSize(Parameters params, CamcorderProfile profile) {
+        if (CameraUtil.needsEarlyVideoSize()) {
+            params.set("video-size", profile.videoFrameWidth + "x" + profile.videoFrameHeight);
+        }
+    }
+
+
     public CameraSettings(Activity activity, Parameters parameters,
                           int cameraId, CameraInfo[] cameraInfo) {
         mContext = activity;

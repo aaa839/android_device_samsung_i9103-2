@@ -35,6 +35,8 @@
     <bool name="needsSamsungCamMode">false</bool>
     <!-- HTC Camcorder Mode -->
     <bool name="needsHTCCamMode">false</bool>
+    <!-- Allows setting video size before recording starts -->
+    <bool name="needsEarlyVideoSize">true</bool>
 
     <!-- Ordered list of detected scene modes
          This should reference the list in camera_asd_values and

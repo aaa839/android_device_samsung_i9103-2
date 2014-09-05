@@ -228,6 +228,9 @@ public class CameraUtil {
     // HTC camcorder mode
     private static boolean sHTCCamMode;
 
+	// For setting video size before recording starts
+    private static boolean sEarlyVideoSize;
+
     private CameraUtil() {
     }
 
@@ -249,6 +252,7 @@ public class CameraUtil {
                 com.android.internal.R.integer.config_deviceHardwareKeys);
         sSamsungCamMode = context.getResources().getBoolean(R.bool.needsSamsungCamMode);
         sHTCCamMode = context.getResources().getBoolean(R.bool.needsHTCCamMode);
+        sEarlyVideoSize = context.getResources().getBoolean(R.bool.needsEarlyVideoSize);
         sASDModes = context.getResources().getStringArray(R.array.asdModes);
         sEnableHDRWithZSL = context.getResources().getBoolean(R.bool.enableHDRWithZSL);
         sEnableHistogram = context.getResources().getBoolean(R.bool.enableHistogram);
@@ -272,6 +276,10 @@ public class CameraUtil {
 
     public static boolean useSamsungCamMode() {
         return sSamsungCamMode;
+    }
+
+	public static boolean needsEarlyVideoSize() {
+        return sEarlyVideoSize;
     }
 
     public static boolean isHDRWithZSLEnabled() {
