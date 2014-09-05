@@ -1,0 +1,99 @@
+From 9a009c7ec1e6d0510714c57920273fdd916ce207 Mon Sep 17 00:00:00 2001
+From: Nikhil <nikhil@menghani.com>
+Date: Fri, 5 Sep 2014 13:01:29 +0530
+Subject: [PATCH] setting video-size before recording patch
+
+---
+ CameraSettings.java  | 13 +++++++++++++
+ VideoModule.java     |  3 +++
+ util/CameraUtil.java |  8 ++++++++
+ values/config.xml    |  2 ++
+ 4 files changed, 26 insertions(+)
+
+diff --git a/src/com/android/camera/CameraSettings.java b/src/com/android/camera/CameraSettings.java
+index 013d090..69a7050 100644
+--- a/src/com/android/camera/CameraSettings.java
++++ b/src/com/android/camera/CameraSettings.java
+@@ -166,6 +166,19 @@ public class CameraSettings {
+     public static final int META_DATA_FD  = 2;
+     public static final int META_DATA_HDR = 3;
+ 
++/**
++     * Set video size for certain cameras.
++     *
++     * @param params
++     * @param profile
++     */
++    public static void setEarlyVideoSize(Parameters params, CamcorderProfile profile) {
++        if (CameraUtil.needsEarlyVideoSize()) {
++            params.set("video-size", profile.videoFrameWidth + "x" + profile.videoFrameHeight);
++        }
++    }
++
++
+     public CameraSettings(Activity activity, Parameters parameters,
+                           int cameraId, CameraInfo[] cameraInfo) {
+         mContext = activity;
+diff --git a/src/com/android/camera/VideoModule.java b/src/com/android/camera/VideoModule.java
+index e695494..3686328 100644
+--- a/src/com/android/camera/VideoModule.java
++++ b/src/com/android/camera/VideoModule.java
+@@ -2075,6 +2075,9 @@ public class VideoModule implements CameraModule,
+         // Set video mode
+         CameraSettings.setVideoMode(mParameters, true);
+ 
++		// Set video size before recording starts
++        CameraSettings.setEarlyVideoSize(mParameters, mProfile);
++
+         forceFlashOffIfSupported(!mPreviewFocused);
+ 
+         videoWidth = mProfile.videoFrameWidth;
+diff --git a/src/com/android/camera/util/CameraUtil.java b/src/com/android/camera/util/CameraUtil.java
+index 9c42194..62077d2 100644
+--- a/src/com/android/camera/util/CameraUtil.java
++++ b/src/com/android/camera/util/CameraUtil.java
+@@ -228,6 +228,9 @@ public class CameraUtil {
+     // HTC camcorder mode
+     private static boolean sHTCCamMode;
+ 
++	// For setting video size before recording starts
++    private static boolean sEarlyVideoSize;
++
+     private CameraUtil() {
+     }
+ 
+@@ -249,6 +252,7 @@ public class CameraUtil {
+                 com.android.internal.R.integer.config_deviceHardwareKeys);
+         sSamsungCamMode = context.getResources().getBoolean(R.bool.needsSamsungCamMode);
+         sHTCCamMode = context.getResources().getBoolean(R.bool.needsHTCCamMode);
++        sEarlyVideoSize = context.getResources().getBoolean(R.bool.needsEarlyVideoSize);
+         sASDModes = context.getResources().getStringArray(R.array.asdModes);
+         sEnableHDRWithZSL = context.getResources().getBoolean(R.bool.enableHDRWithZSL);
+         sEnableHistogram = context.getResources().getBoolean(R.bool.enableHistogram);
+@@ -274,6 +278,10 @@ public class CameraUtil {
+         return sSamsungCamMode;
+     }
+ 
++	public static boolean needsEarlyVideoSize() {
++        return sEarlyVideoSize;
++    }
++
+     public static boolean isHDRWithZSLEnabled() {
+         return sEnableHDRWithZSL;
+     }
+diff --git a/res/values/config.xml b/res/values/config.xml
+index f8ca503..74ba063 100644
+--- a/res/values/config.xml
++++ b/res/values/config.xml
+@@ -35,6 +35,8 @@
+     <bool name="needsSamsungCamMode">false</bool>
+     <!-- HTC Camcorder Mode -->
+     <bool name="needsHTCCamMode">false</bool>
++    <!-- Allows setting video size before recording starts -->
++    <bool name="needsEarlyVideoSize">true</bool>
+ 
+     <!-- Ordered list of detected scene modes
+          This should reference the list in camera_asd_values and
+-- 
+1.9.1
+
