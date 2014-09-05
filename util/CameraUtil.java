@@ -230,6 +230,9 @@ public class CameraUtil {
 
 	// For setting video size before recording starts
     private static boolean sEarlyVideoSize;
+    
+    // For setting video desired profile size
+    private static boolean sProfileVideoSize;
 
     private CameraUtil() {
     }
@@ -252,6 +255,7 @@ public class CameraUtil {
                 com.android.internal.R.integer.config_deviceHardwareKeys);
         sSamsungCamMode = context.getResources().getBoolean(R.bool.needsSamsungCamMode);
         sHTCCamMode = context.getResources().getBoolean(R.bool.needsHTCCamMode);
+        sProfileVideoSize = context.getResources().getBoolean(R.bool.useProfileVideoSize);
         sEarlyVideoSize = context.getResources().getBoolean(R.bool.needsEarlyVideoSize);
         sASDModes = context.getResources().getStringArray(R.array.asdModes);
         sEnableHDRWithZSL = context.getResources().getBoolean(R.bool.enableHDRWithZSL);
@@ -276,6 +280,10 @@ public class CameraUtil {
 
     public static boolean useSamsungCamMode() {
         return sSamsungCamMode;
+    }
+
+	public static boolean useProfileVideoSize() {
+        return sProfileVideoSize;
     }
 
 	public static boolean needsEarlyVideoSize() {
