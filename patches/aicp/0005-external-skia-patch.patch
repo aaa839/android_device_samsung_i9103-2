@@ -1,0 +1,28 @@
+From 095bfeab77cb1817b2d50d42b39550faff222d7f Mon Sep 17 00:00:00 2001
+From: Nikhil <nikhil@menghani.com>
+Date: Tue, 29 Jul 2014 19:50:18 +0530
+Subject: [PATCH] external skia patch
+
+---
+ src/core/SkPaint.cpp | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/src/core/SkPaint.cpp b/src/core/SkPaint.cpp
+index f779aaa..52afc20 100644
+--- a/src/core/SkPaint.cpp
++++ b/src/core/SkPaint.cpp
+@@ -203,9 +203,11 @@ SkPaint::SkPaint() {
+ }
+ 
+ SkPaint::SkPaint(const SkPaint& src) {
++#ifdef NEON_BLIT_ANTI_H
+     if (sizeof(src) == SIZE_OF_PAINT)
+         memcpy_paint_opt((int*)this, (int*)&src);
+     else
++#endif
+         memcpy((int*)this, (int*)&src, sizeof(src));
+ 
+     SkSafeRef(fTypeface);
+-- 
+1.9.1
+
