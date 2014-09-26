@@ -74,6 +74,11 @@ LOCAL_SRC_FILES+= \
     AudioParameter.cpp
 endif
 
+#for older OMX video (tegra2)
+ifeq ($(BOARD_USE_OLD_OMX),true)
+    LOCAL_CFLAGS += -DUSE_OLD_OMX
+endif
+
 ifeq ($(BOARD_USE_SAMSUNG_SEPARATEDSTREAM),true)
 LOCAL_CFLAGS += -DUSE_SAMSUNG_SEPARATEDSTREAM
 endif
