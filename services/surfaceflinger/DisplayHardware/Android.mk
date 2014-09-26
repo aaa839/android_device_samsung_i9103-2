@@ -52,6 +52,16 @@ ifeq ($(TARGET_FORCE_HWC_FOR_VIRTUAL_DISPLAYS),true)
     LOCAL_CFLAGS += -DFORCE_HWC_COPY_FOR_VIRTUAL_DISPLAYS
 endif
 
+#this defines CFLAGS for tegra2 devices for backwards compatibility with old EGL
+ifeq ($(BOARD_EGL_NEEDS_FNW),true)
+    LOCAL_CFLAGS += -DEGL_NEEDS_FNW
+endif
+
+#this defines CFLAGS for tegra2 devices for fixing layer dump
+ifeq ($(BOARD_FNW_NEEDS_LAYER_DUMP),true)
+    LOCAL_CFLAGS += -DFNW_NEEDS_LAYER_DUMP
+endif
+
 ifneq ($(NUM_FRAMEBUFFER_SURFACE_BUFFERS),)
   LOCAL_CFLAGS += -DNUM_FRAMEBUFFER_SURFACE_BUFFERS=$(NUM_FRAMEBUFFER_SURFACE_BUFFERS)
 endif
