@@ -1,21 +1,22 @@
-From 33819018ad5445399c270aa2430f6039975cdd37 Mon Sep 17 00:00:00 2001
+From 0fa87a04e1378c4c3c1d4c9f5a6a2a0e3e707f69 Mon Sep 17 00:00:00 2001
 From: Nikhil <nikhil@menghani.com>
-Date: Thu, 18 Sep 2014 10:32:59 +0530
+Date: Fri, 26 Sep 2014 11:48:03 +0530
 Subject: [PATCH] DisplayDevice: Backwards compatibility with old EGL
 
 ---
- services/surfaceflinger/Android.mk        |  4 ++++
- services/surfaceflinger/DisplayDevice.cpp | 10 ++++++++++
- 2 files changed, 14 insertions(+)
+ services/surfaceflinger/Android.mk        | 5 +++++
+ services/surfaceflinger/DisplayDevice.cpp | 4 ++--
+ 2 files changed, 7 insertions(+), 2 deletions(-)
 
 diff --git a/services/surfaceflinger/Android.mk b/services/surfaceflinger/Android.mk
-index 211f5b1..d8d7491 100644
+index 211f5b1..83b106b 100644
 --- a/services/surfaceflinger/Android.mk
 +++ b/services/surfaceflinger/Android.mk
-@@ -52,6 +52,10 @@ ifeq ($(TARGET_FORCE_HWC_FOR_VIRTUAL_DISPLAYS),true)
+@@ -52,6 +52,11 @@ ifeq ($(TARGET_FORCE_HWC_FOR_VIRTUAL_DISPLAYS),true)
      LOCAL_CFLAGS += -DFORCE_HWC_COPY_FOR_VIRTUAL_DISPLAYS
  endif
  
++#this defines CFLAGS for tegra2 devices for backwards compatibility with old EGL
 +ifeq ($(BOARD_EGL_NEEDS_FNW),true)
 +    LOCAL_CFLAGS += -DEGL_NEEDS_FNW
 +endif
@@ -24,33 +25,27 @@ index 211f5b1..d8d7491 100644
    LOCAL_CFLAGS += -DNUM_FRAMEBUFFER_SURFACE_BUFFERS=$(NUM_FRAMEBUFFER_SURFACE_BUFFERS)
  endif
 diff --git a/services/surfaceflinger/DisplayDevice.cpp b/services/surfaceflinger/DisplayDevice.cpp
-index e0c86f8..f77a7b3 100755
+index e0c86f8..fe41552 100755
 --- a/services/surfaceflinger/DisplayDevice.cpp
 +++ b/services/surfaceflinger/DisplayDevice.cpp
-@@ -32,6 +32,10 @@
+@@ -26,7 +26,7 @@
  
- #include <gui/Surface.h>
- 
-+#ifdef EGL_NEEDS_FNW
-+#include <ui/FramebufferNativeWindow.h>
-+#endif
-+
- #include <hardware/gralloc.h>
- 
- #include "DisplayHardware/DisplaySurface.h"
-@@ -84,6 +88,12 @@ DisplayDevice::DisplayDevice(
-     ANativeWindow* const window = mNativeWindow.get();
+ #include <ui/DisplayInfo.h>
+ #include <ui/PixelFormat.h>
+-#ifdef STE_HARDWARE
++#if defined (STE_HARDWARE) || defined (EGL_NEEDS_FNW)
+ #include <ui/FramebufferNativeWindow.h>
  #endif
  
-+#ifndef EGL_NEEDS_FNW
-+    ANativeWindow* const window = mNativeWindow.get();
-+#else
-+	ANativeWindow* const window = new FramebufferNativeWindow();
-+#endif
-+
-     int format;
-     window->query(window, NATIVE_WINDOW_FORMAT, &format);
- 
+@@ -77,7 +77,7 @@ DisplayDevice::DisplayDevice(
+       mHardwareOrientation(0),
+       mOrientation()
+ {
+-#ifdef STE_HARDWARE
++#if defined (STE_HARDWARE) || defined (EGL_NEEDS_FNW)
+     ANativeWindow* const window = new FramebufferNativeWindow();
+ #else
+     mNativeWindow = new Surface(producer, false);
 -- 
 1.9.1
 
