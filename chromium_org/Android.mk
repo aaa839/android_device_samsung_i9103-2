@@ -26,3 +26,8 @@ include $(CHROMIUM_DIR)/android_webview/Android.mk
 
 endif
 endif
+
+# Workaround for broken texture is to prevent binding external OES (for tegra2)
+ifeq ($(BOARD_HAS_BROKEN_GL_TEXTURE),true)
+    LOCAL_CFLAGS += -DPREVENT_BINDING_EXTERNAL_OES
+endif

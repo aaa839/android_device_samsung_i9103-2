@@ -65,6 +65,9 @@ class GL_EXPORT SurfaceTexture
 
   // Java SurfaceTexture instance.
   base::android::ScopedJavaGlobalRef<jobject> j_surface_texture_;
+#ifdef PREVENT_BINDING_EXTERNAL_OES
+  int j_texture_id_;
+#endif
 
   DISALLOW_COPY_AND_ASSIGN(SurfaceTexture);
 };

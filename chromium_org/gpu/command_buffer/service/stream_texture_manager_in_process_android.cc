@@ -20,10 +20,14 @@ StreamTextureManagerInProcess::StreamTextureImpl::StreamTextureImpl(
 StreamTextureManagerInProcess::StreamTextureImpl::~StreamTextureImpl() {}
 
 void StreamTextureManagerInProcess::StreamTextureImpl::Update() {
+#ifndef PREVENT_BINDING_EXTERNAL_OES
   GLint texture_id = 0;
   glGetIntegerv(GL_TEXTURE_BINDING_EXTERNAL_OES, &texture_id);
   surface_texture_->UpdateTexImage();
   glBindTexture(GL_TEXTURE_EXTERNAL_OES, texture_id);
+#else
+  surface_texture_->UpdateTexImage();
+#endif
 }
 
 gfx::Size StreamTextureManagerInProcess::StreamTextureImpl::GetSize() {
