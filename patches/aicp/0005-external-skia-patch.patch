@@ -1,21 +1,38 @@
-From 095bfeab77cb1817b2d50d42b39550faff222d7f Mon Sep 17 00:00:00 2001
+From d8ed8822705bda9a19846994932171049686b41a Mon Sep 17 00:00:00 2001
 From: Nikhil <nikhil@menghani.com>
-Date: Tue, 29 Jul 2014 19:50:18 +0530
+Date: Fri, 26 Sep 2014 14:24:31 +0530
 Subject: [PATCH] external skia patch
 
 ---
- src/core/SkPaint.cpp | 2 ++
- 1 file changed, 2 insertions(+)
+ skia/Android.mk           | 5 +++++
+ skia/src/core/SkPaint.cpp | 2 ++
+ 2 files changed, 7 insertions(+)
 
-diff --git a/src/core/SkPaint.cpp b/src/core/SkPaint.cpp
-index f779aaa..52afc20 100644
---- a/src/core/SkPaint.cpp
-+++ b/src/core/SkPaint.cpp
-@@ -203,9 +203,11 @@ SkPaint::SkPaint() {
+diff --git a/skia/Android.mk b/skia/Android.mk
+index 4b64c85..c687890 100644
+--- a/skia/Android.mk
++++ b/skia/Android.mk
+@@ -50,6 +50,11 @@ endif
+ 
+ LOCAL_CFLAGS += -DDCT_IFAST_SUPPORTED
+ 
++#non neon devices need a flag to not compare SIZE_OF_PAINT in skia
++ifeq ($(ARCH_ARM_HAVE_NON_NEON),true)
++    LOCAL_CFLAGS += -DHAVE_NON_NEON_ARM
++endif
++
+ # using freetype's embolden allows us to adjust fake bold settings at
+ # draw-time, at which point we know which SkTypeface is being drawn
+ LOCAL_CFLAGS += -DSK_USE_FREETYPE_EMBOLDEN
+diff --git a/skia/src/core/SkPaint.cpp b/skia/src/core/SkPaint.cpp
+index 71199c7..7878bda 100644
+--- a/skia/src/core/SkPaint.cpp
++++ b/skia/src/core/SkPaint.cpp
+@@ -207,9 +207,11 @@ SkPaint::SkPaint() {
  }
  
  SkPaint::SkPaint(const SkPaint& src) {
-+#ifdef NEON_BLIT_ANTI_H
++#ifndef HAVE_NON_NEON_ARM
      if (sizeof(src) == SIZE_OF_PAINT)
          memcpy_paint_opt((int*)this, (int*)&src);
      else
