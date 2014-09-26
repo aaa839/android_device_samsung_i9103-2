@@ -50,6 +50,11 @@ endif
 
 LOCAL_CFLAGS += -DDCT_IFAST_SUPPORTED
 
+#non neon devices need a flag to not compare SIZE_OF_PAINT in skia
+ifeq ($(ARCH_ARM_HAVE_NON_NEON),true)
+    LOCAL_CFLAGS += -DHAVE_NON_NEON_ARM
+endif
+
 # using freetype's embolden allows us to adjust fake bold settings at
 # draw-time, at which point we know which SkTypeface is being drawn
 LOCAL_CFLAGS += -DSK_USE_FREETYPE_EMBOLDEN
