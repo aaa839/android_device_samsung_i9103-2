@@ -1,90 +1,126 @@
-From 17bac4fc7cf38244cc197915ca91ce7c229701e1 Mon Sep 17 00:00:00 2001
+From cd3c4d4f157a3bbd680b86064cebc616054afcd8 Mon Sep 17 00:00:00 2001
 From: Nikhil <nikhil@menghani.com>
-Date: Tue, 29 Jul 2014 20:00:39 +0530
+Date: Fri, 26 Sep 2014 14:44:42 +0530
 Subject: [PATCH] Work around broken GL_TEXTURE_BINDING_EXTERNAL_OES query
 
 ---
- ui/gl/android/surface_texture.cc                                     | 7 +++----
- ui/gl/android/surface_texture.h                                      | 1 +
- android_webview/browser/scoped_app_gl_state_restore.cc               | 3 ---
- .../service/stream_texture_manager_in_process_android.cc             | 3 ---
- 4 files changed, 4 insertions(+), 10 deletions(-)
+ Android.mk                               |  5 +++++
+ .../browser/scoped_app_gl_state_restore.cc            |  4 ++++
+ .../stream_texture_manager_in_process_android.cc      |  4 ++++
+ ui/gl/android/surface_texture.cc         | 19 +++++++++++++++----
+ ui/gl/android/surface_texture.h          |  3 +++
+ 5 files changed, 31 insertions(+), 4 deletions(-)
 
+diff --git a/Android.mk b/Android.mk
+index aaeed5c..6037e70 100644
+--- a/Android.mk
++++ b/Android.mk
+@@ -26,3 +26,8 @@ include $(CHROMIUM_DIR)/android_webview/Android.mk
+ 
+ endif
+ endif
++
++# Workaround for broken texture is to prevent binding external OES (for tegra2)
++ifeq ($(BOARD_HAS_BROKEN_GL_TEXTURE),true)
++    LOCAL_CFLAGS += -DPREVENT_BINDING_EXTERNAL_OES
++endif
+diff --git a/android_webview/browser/scoped_app_gl_state_restore.cc b/android_webview/browser/scoped_app_gl_state_restore.cc
+index 6f71eee..64b9d59 100644
+--- a/android_webview/browser/scoped_app_gl_state_restore.cc
++++ b/android_webview/browser/scoped_app_gl_state_restore.cc
+@@ -137,8 +137,10 @@ ScopedAppGLStateRestore::ScopedAppGLStateRestore(CallMode mode) : mode_(mode) {
+     TextureBindings& bindings = texture_bindings_[ii];
+     glGetIntegerv(GL_TEXTURE_BINDING_2D, &bindings.texture_2d);
+     glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &bindings.texture_cube_map);
++#ifndef PREVENT_BINDING_EXTERNAL_OES
+     glGetIntegerv(GL_TEXTURE_BINDING_EXTERNAL_OES,
+                   &bindings.texture_external_oes);
++#endif
+   }
+ }
+ 
+@@ -155,7 +157,9 @@ ScopedAppGLStateRestore::~ScopedAppGLStateRestore() {
+     TextureBindings& bindings = texture_bindings_[ii];
+     glBindTexture(GL_TEXTURE_2D, bindings.texture_2d);
+     glBindTexture(GL_TEXTURE_CUBE_MAP, bindings.texture_cube_map);
++#ifndef PREVENT_BINDING_EXTERNAL_OES
+     glBindTexture(GL_TEXTURE_EXTERNAL_OES, bindings.texture_external_oes);
++#endif
+   }
+   glActiveTexture(active_texture_);
+ 
+diff --git a/gpu/command_buffer/service/stream_texture_manager_in_process_android.cc b/gpu/command_buffer/service/stream_texture_manager_in_process_android.cc
+index 2fd5535..cdaa1ab 100644
+--- a/gpu/command_buffer/service/stream_texture_manager_in_process_android.cc
++++ b/gpu/command_buffer/service/stream_texture_manager_in_process_android.cc
+@@ -20,10 +20,14 @@ StreamTextureManagerInProcess::StreamTextureImpl::StreamTextureImpl(
+ StreamTextureManagerInProcess::StreamTextureImpl::~StreamTextureImpl() {}
+ 
+ void StreamTextureManagerInProcess::StreamTextureImpl::Update() {
++#ifndef PREVENT_BINDING_EXTERNAL_OES
+   GLint texture_id = 0;
+   glGetIntegerv(GL_TEXTURE_BINDING_EXTERNAL_OES, &texture_id);
+   surface_texture_->UpdateTexImage();
+   glBindTexture(GL_TEXTURE_EXTERNAL_OES, texture_id);
++#else
++  surface_texture_->UpdateTexImage();
++#endif
+ }
+ 
+ gfx::Size StreamTextureManagerInProcess::StreamTextureImpl::GetSize() {
 diff --git a/ui/gl/android/surface_texture.cc b/ui/gl/android/surface_texture.cc
-index 35f9b47..ccf1f31 100644
+index 35f9b47..0d222bf 100644
 --- a/ui/gl/android/surface_texture.cc
 +++ b/ui/gl/android/surface_texture.cc
-@@ -30,6 +30,7 @@ SurfaceTexture::SurfaceTexture(int texture_id) {
+@@ -30,6 +30,9 @@ SurfaceTexture::SurfaceTexture(int texture_id) {
    JNIEnv* env = base::android::AttachCurrentThread();
    j_surface_texture_.Reset(
        Java_SurfaceTexturePlatformWrapper_create(env, texture_id));
++#ifdef PREVENT_BINDING_EXTERNAL_OES
 +      j_texture_id_ = texture_id;
++#endif
  }
  
  SurfaceTexture::~SurfaceTexture() {
-@@ -83,12 +84,10 @@ void SurfaceTexture::SetDefaultBufferSize(int width, int height) {
+@@ -83,12 +86,20 @@ void SurfaceTexture::SetDefaultBufferSize(int width, int height) {
  
  void SurfaceTexture::AttachToGLContext() {
    if (GlContextMethodsAvailable()) {
 -    int texture_id;
 -    glGetIntegerv(GL_TEXTURE_BINDING_EXTERNAL_OES, &texture_id);
 -    DCHECK(texture_id);
-+    DCHECK(j_texture_id_);
++#ifdef PREVENT_BINDING_EXTERNAL_OES
++		DCHECK(j_texture_id_);
++#else
++		int texture_id;
++		glGetIntegerv(GL_TEXTURE_BINDING_EXTERNAL_OES, &texture_id);
++		DCHECK(texture_id);
++#endif
      JNIEnv* env = base::android::AttachCurrentThread();
      Java_SurfaceTexturePlatformWrapper_attachToGLContext(
 -        env, j_surface_texture_.obj(), texture_id);
-+        env, j_surface_texture_.obj(), j_texture_id_);
++#ifdef PREVENT_BINDING_EXTERNAL_OES
++		env, j_surface_texture_.obj(), j_texture_id_);
++#else
++		env, j_surface_texture_.obj(), texture_id);
++#endif
    }
  }
  
 diff --git a/ui/gl/android/surface_texture.h b/ui/gl/android/surface_texture.h
-index 62e375f..5d71501 100644
+index 62e375f..b8d7ec9 100644
 --- a/ui/gl/android/surface_texture.h
 +++ b/ui/gl/android/surface_texture.h
-@@ -65,6 +65,7 @@ class GL_EXPORT SurfaceTexture
+@@ -65,6 +65,9 @@ class GL_EXPORT SurfaceTexture
  
    // Java SurfaceTexture instance.
    base::android::ScopedJavaGlobalRef<jobject> j_surface_texture_;
++#ifdef PREVENT_BINDING_EXTERNAL_OES
 +  int j_texture_id_;
++#endif
  
    DISALLOW_COPY_AND_ASSIGN(SurfaceTexture);
  };
-diff --git a/android_webview/browser/scoped_app_gl_state_restore.cc b/android_webview/browser/scoped_app_gl_state_restore.cc
-index 6f71eee..dfa4646 100644
---- a/android_webview/browser/scoped_app_gl_state_restore.cc
-+++ b/android_webview/browser/scoped_app_gl_state_restore.cc
-@@ -137,8 +137,6 @@ ScopedAppGLStateRestore::ScopedAppGLStateRestore(CallMode mode) : mode_(mode) {
-     TextureBindings& bindings = texture_bindings_[ii];
-     glGetIntegerv(GL_TEXTURE_BINDING_2D, &bindings.texture_2d);
-     glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &bindings.texture_cube_map);
--    glGetIntegerv(GL_TEXTURE_BINDING_EXTERNAL_OES,
--                  &bindings.texture_external_oes);
-   }
- }
- 
-@@ -155,7 +153,6 @@ ScopedAppGLStateRestore::~ScopedAppGLStateRestore() {
-     TextureBindings& bindings = texture_bindings_[ii];
-     glBindTexture(GL_TEXTURE_2D, bindings.texture_2d);
-     glBindTexture(GL_TEXTURE_CUBE_MAP, bindings.texture_cube_map);
--    glBindTexture(GL_TEXTURE_EXTERNAL_OES, bindings.texture_external_oes);
-   }
-   glActiveTexture(active_texture_);
- 
-diff --git a/gpu/command_buffer/service/stream_texture_manager_in_process_android.cc b/gpu/command_buffer/service/stream_texture_manager_in_process_android.cc
-index 2fd5535..8988f02 100644
---- a/gpu/command_buffer/service/stream_texture_manager_in_process_android.cc
-+++ b/gpu/command_buffer/service/stream_texture_manager_in_process_android.cc
-@@ -20,10 +20,7 @@ StreamTextureManagerInProcess::StreamTextureImpl::StreamTextureImpl(
- StreamTextureManagerInProcess::StreamTextureImpl::~StreamTextureImpl() {}
- 
- void StreamTextureManagerInProcess::StreamTextureImpl::Update() {
--  GLint texture_id = 0;
--  glGetIntegerv(GL_TEXTURE_BINDING_EXTERNAL_OES, &texture_id);
-   surface_texture_->UpdateTexImage();
--  glBindTexture(GL_TEXTURE_EXTERNAL_OES, texture_id);
- }
- 
- gfx::Size StreamTextureManagerInProcess::StreamTextureImpl::GetSize() {
 -- 
 1.9.1
 

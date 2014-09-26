@@ -4,14 +4,14 @@ Date: Fri, 26 Sep 2014 14:24:31 +0530
 Subject: [PATCH] external skia patch
 
 ---
- skia/Android.mk           | 5 +++++
- skia/src/core/SkPaint.cpp | 2 ++
+ Android.mk           | 5 +++++
+ src/core/SkPaint.cpp | 2 ++
  2 files changed, 7 insertions(+)
 
-diff --git a/skia/Android.mk b/skia/Android.mk
+diff --git a/Android.mk b/Android.mk
 index 4b64c85..c687890 100644
---- a/skia/Android.mk
-+++ b/skia/Android.mk
+--- a/Android.mk
++++ b/Android.mk
 @@ -50,6 +50,11 @@ endif
  
  LOCAL_CFLAGS += -DDCT_IFAST_SUPPORTED
@@ -24,10 +24,10 @@ index 4b64c85..c687890 100644
  # using freetype's embolden allows us to adjust fake bold settings at
  # draw-time, at which point we know which SkTypeface is being drawn
  LOCAL_CFLAGS += -DSK_USE_FREETYPE_EMBOLDEN
-diff --git a/skia/src/core/SkPaint.cpp b/skia/src/core/SkPaint.cpp
+diff --git a/src/core/SkPaint.cpp b/src/core/SkPaint.cpp
 index 71199c7..7878bda 100644
---- a/skia/src/core/SkPaint.cpp
-+++ b/skia/src/core/SkPaint.cpp
+--- a/src/core/SkPaint.cpp
++++ b/src/core/SkPaint.cpp
 @@ -207,9 +207,11 @@ SkPaint::SkPaint() {
  }
  
