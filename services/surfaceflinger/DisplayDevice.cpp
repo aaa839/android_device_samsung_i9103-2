@@ -26,7 +26,7 @@
 
 #include <ui/DisplayInfo.h>
 #include <ui/PixelFormat.h>
-#ifdef STE_HARDWARE
+#if defined (STE_HARDWARE) || defined (EGL_NEEDS_FNW)
 #include <ui/FramebufferNativeWindow.h>
 #endif
 
@@ -77,7 +77,7 @@ DisplayDevice::DisplayDevice(
       mHardwareOrientation(0),
       mOrientation()
 {
-#ifdef STE_HARDWARE
+#if defined (STE_HARDWARE) || defined (EGL_NEEDS_FNW)
     ANativeWindow* const window = new FramebufferNativeWindow();
 #else
     mNativeWindow = new Surface(producer, false);
