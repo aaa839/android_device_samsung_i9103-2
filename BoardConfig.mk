@@ -35,6 +35,9 @@ APP_ABI := armeabi-v7a
 NEED_WORKAROUND_CORTEX_A9_745320 := true
 # COMMON_GLOBAL_CFLAGS += -DWORKAROUND_CORTEX_A9_745320
 
+#Use old omx for video compatibility
+COMMON_GLOBAL_CFLAGS += -DUSE_TEGRA2_OMX
+
 # DO NOT change the following line to vfpv3 as it is not really supported on our device!
 TARGET_ARCH_VARIANT_FPU := vfpv3-d16
 ARCH_ARM_HAVE_TLS_REGISTER := true
