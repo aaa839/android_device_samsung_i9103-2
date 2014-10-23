@@ -1,0 +1,125 @@
+From 7ee05b17a4067716c16731f48ce2e7cd8f019b89 Mon Sep 17 00:00:00 2001
+From: Nikhil <nikhil@menghani.com>
+Date: Thu, 23 Oct 2014 13:53:45 +0530
+Subject: [PATCH] 
+ 0002-DisplayDevice-Backwards-compatibility-with-old-EGL+0003-Fix-layer-dump-for-tegra2
+
+---
+ services/surfaceflinger/Android.mk                 | 10 ++++
+ services/surfaceflinger/DisplayDevice.cpp          |  4 +-
+ .../surfaceflinger/DisplayHardware/HWComposer.cpp  | 56 ++++++++++++++++++++++
+ 3 files changed, 68 insertions(+), 2 deletions(-)
+
+diff --git a/services/surfaceflinger/Android.mk b/services/surfaceflinger/Android.mk
+index 0166b89..690d8a0 100644
+--- a/services/surfaceflinger/Android.mk
++++ b/services/surfaceflinger/Android.mk
+@@ -52,6 +52,16 @@ ifeq ($(TARGET_FORCE_HWC_FOR_VIRTUAL_DISPLAYS),true)
+     LOCAL_CFLAGS += -DFORCE_HWC_COPY_FOR_VIRTUAL_DISPLAYS
+ endif
+ 
++#this defines CFLAGS for tegra2 devices for backwards compatibility with old EGL
++ifeq ($(BOARD_EGL_NEEDS_FNW),true)
++    LOCAL_CFLAGS += -DEGL_NEEDS_FNW
++endif
++
++#this defines CFLAGS for tegra2 devices for fixing layer dump
++ifeq ($(BOARD_FNW_NEEDS_LAYER_DUMP),true)
++    LOCAL_CFLAGS += -DFNW_NEEDS_LAYER_DUMP
++endif
++
+ ifneq ($(NUM_FRAMEBUFFER_SURFACE_BUFFERS),)
+   LOCAL_CFLAGS += -DNUM_FRAMEBUFFER_SURFACE_BUFFERS=$(NUM_FRAMEBUFFER_SURFACE_BUFFERS)
+ endif
+diff --git a/services/surfaceflinger/DisplayDevice.cpp b/services/surfaceflinger/DisplayDevice.cpp
+index e0c86f8..fe41552 100755
+--- a/services/surfaceflinger/DisplayDevice.cpp
++++ b/services/surfaceflinger/DisplayDevice.cpp
+@@ -26,7 +26,7 @@
+ 
+ #include <ui/DisplayInfo.h>
+ #include <ui/PixelFormat.h>
+-#ifdef STE_HARDWARE
++#if defined (STE_HARDWARE) || defined (EGL_NEEDS_FNW)
+ #include <ui/FramebufferNativeWindow.h>
+ #endif
+ 
+@@ -77,7 +77,7 @@ DisplayDevice::DisplayDevice(
+       mHardwareOrientation(0),
+       mOrientation()
+ {
+-#ifdef STE_HARDWARE
++#if defined (STE_HARDWARE) || defined (EGL_NEEDS_FNW)
+     ANativeWindow* const window = new FramebufferNativeWindow();
+ #else
+     mNativeWindow = new Surface(producer, false);
+diff --git a/services/surfaceflinger/DisplayHardware/HWComposer.cpp b/services/surfaceflinger/DisplayHardware/HWComposer.cpp
+index bc67dfd..cdf3b24 100644
+--- a/services/surfaceflinger/DisplayHardware/HWComposer.cpp
++++ b/services/surfaceflinger/DisplayHardware/HWComposer.cpp
+@@ -1393,6 +1393,62 @@ void HWComposer::dump(String8& result) const {
+                     i, disp.width, disp.height, disp.xdpi, disp.ydpi, disp.refresh);
+ 
+             if (disp.list) {
++				
++				#ifdef FNW_NEEDS_LAYER_DUMP
++					if ( hwcApiVersion(mHwc) == 0)
++					{
++						hwc_layer_list_t *list = (hwc_layer_list_t*) disp.list;
++						result.appendFormat(
++								"  numHwLayers=%u, flags=%08x\n",
++								list->numHwLayers, list->flags);
++
++						result.append(
++								"    type    |  handle  |   hints  |   flags  | tr | blend |  format  |          source crop            |           frame           name \n"
++								"------------+----------+----------+----------+----+-------+----------+---------------------------------+--------------------------------\n");
++						//      " __________ | ________ | ________ | ________ | __ | _____ | ________ | [_____._,_____._,_____._,_____._] | [_____,_____,_____,_____]
++					for (size_t i=0 ; i<list->numHwLayers ; i++) {
++							const hwc_layer_t&l = list->hwLayers[i];
++							int32_t format = -1;
++							String8 name("unknown");
++
++							if (i < visibleLayersSortedByZ.size()) {
++								const sp<Layer>& layer(visibleLayersSortedByZ[i]);
++								const sp<GraphicBuffer>& buffer(
++										layer->getActiveBuffer());
++								if (buffer != NULL) {
++									format = buffer->getPixelFormat();
++								}
++								name = layer->getName();
++							}
++
++							int type = l.compositionType;
++							if (type == HWC_FRAMEBUFFER_TARGET) {
++								name = "HWC_FRAMEBUFFER_TARGET";
++								format = disp.format;
++							}
++
++							static char const* compositionTypeName[] = {
++								"GLES",
++								"HWC",
++								"BACKGROUND",
++								"FB TARGET",
++								"FB_BLIT",
++								"UNKNOWN"};
++							if (type >= NELEM(compositionTypeName))
++								type = NELEM(compositionTypeName) - 1;
++
++							result.appendFormat(
++									" %10s | %08x | %08x | %08x | %02x | %05x | %08x | [%7d,%7d,%7d,%7d] | [%5d,%5d,%5d,%5d] %s\n",
++									compositionTypeName[type],
++									intptr_t(l.handle), l.hints, l.flags, l.transform, l.blending, format,
++									l.sourceCrop.left, l.sourceCrop.top, l.sourceCrop.right, l.sourceCrop.bottom,
++									l.displayFrame.left, l.displayFrame.top, l.displayFrame.right, l.displayFrame.bottom,
++									name.string());
++						}
++						continue;
++					}
++				#endif
++				
+                 result.appendFormat(
+                         "  numHwLayers=%u, flags=%08x\n",
+                         disp.list->numHwLayers, disp.list->flags);
+-- 
+1.9.1
+
